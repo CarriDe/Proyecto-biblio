@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Inicio - Biblioteca</title>
+</head>
+<body>
+    <h1>Biblioteca</h1>
+
+    {% if user.is_authenticated %}
+        <p>Hola, {{ user.username }}.</p>
+        <p>Rol: {{ user.get_rol_display }}</p>
+        <p><a href="{% url 'logout' %}">Cerrar sesión</a></p>
+    {% else %}
+        <p><a href="{% url 'login' %}">Iniciar sesión</a></p>
+        <p><a href="{% url 'registro' %}">Registrarse</a></p>
+    {% endif %}
+</body>
+</html>

@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.shortcuts import redirect, render
 
@@ -67,6 +67,11 @@ def inicio(request):
     if request.user.is_authenticated:
         context['rol_usuario'] = request.user.rol
     return render(request, 'Biblioteca_1/home.html', context)
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('inicio')
 
 
 def registro(request):

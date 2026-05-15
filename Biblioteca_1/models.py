@@ -14,6 +14,33 @@ class Usuario(AbstractUser):
         return f"{self.first_name} {self.last_name}" if self.first_name or self.last_name else self.username
 
 
+class Autor(models.Model):
+    nombre = models.CharField(max_length=120)
+    apellido = models.CharField(max_length=120, blank=True)
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}".strip()
+
+
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=120, unique=True)
+    descripcion = models.CharField(max_length=250, blank=True)
+
+    def __str__(self):
+        return self.nombre
+
+
+class Prestamo(models.Model):
+    libro = models.ForeignKey('Libro', on_delete=models.CASCADE, related_name='prestamos')
+    usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='prestamos')
+    fecha_prestamo = models.DateTimeField(auto_now_add=True)
+    fecha_devolucion = models.DateTimeField(null=True, blank=True)
+    devuelto = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Prestamo: {self.libro} - {self.usuario}"
+
+
 class Libro(models.Model):
     TIPO_CHOICES = (
         ('NOVELA', 'Novela'),
@@ -32,6 +59,8 @@ class Libro(models.Model):
     creado_por = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='libros_creados', null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True, null=True, blank=True)
     fecha_publicacion = models.DateField(null=True, blank=True)
+    autores = models.ManyToManyField(Autor, related_name='libros', blank=True)
+    categoria = models.ForeignKey(Categoria, on_delete=models.SET_NULL, null=True, blank=True, related_name='libros')
     usuarios_prestamo = models.ManyToManyField(Usuario, related_name='libros_prestados', blank=True, limit_choices_to={'rol': 'USUARIO'})
 
     def __str__(self):

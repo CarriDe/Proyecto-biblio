@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.models import User
+from django.contrib.admin.sites import NotRegistered
 
 from .models import Libro, Usuario
 
@@ -16,6 +17,9 @@ class UsuarioAdmin(BaseUserAdmin):
     )
 
 
-admin.site.unregister(User)
+try:
+    admin.site.unregister(User)
+except NotRegistered:
+    pass
 admin.site.register(Usuario, UsuarioAdmin)
 admin.site.register(Libro)

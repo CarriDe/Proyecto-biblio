@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Libros</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        nav { margin-bottom: 20px; }
+        a { margin-right: 15px; color: #7B2CBF; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .search-box { margin-bottom: 20px; }
+        input { padding: 8px; width: 200px; }
+        button { padding: 8px 15px; background: #7B2CBF; color: white; border: none; cursor: pointer; }
+        button:hover { background: #5A189A; }
+        .libros-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+        .libro-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        .libro-card h3 { margin: 0 0 10px 0; }
+        .libro-card p { margin: 5px 0; color: #666; }
+        .libro-card a { color: #7B2CBF; }
+        .no-libros { text-align: center; color: #999; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_libros' %}">Libros</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+        {% else %}
+            <a href="{% url 'login' %}">Iniciar sesión</a>
+        {% endif %}
+    </nav>
+
+    <h1>📖 Biblioteca</h1>
+
+    <div class="search-box">
+        <form method="get" action="{% url 'buscar' %}">
+            <input type="text" name="q" placeholder="Buscar libros..." value="{{ query }}">
+            <button type="submit">Buscar</button>
+        </form>
+    </div>
+
+    {% if libros %}
+        <div class="libros-grid">
+            {% for libro in libros %}
+                <div class="libro-card">
+                    <h3>{{ libro.titulo }}</h3>
+                    <p><strong>Tipo:</strong> {{ libro.get_tipo_display }}</p>
+                    <p><strong>Disponible:</strong> {% if libro.disponible %}✓{% else %}✗{% endif %}</p>
+                    <p><strong>Categoría:</strong> {{ libro.categoria }}</p>
+                    <a href="{% url 'detalle_libro' libro.id %}">Ver detalles →</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-libros">
+            <p>{% if query %}No se encontraron libros para "{{ query }}"{% else %}No hay libros disponibles{% endif %}</p>
+        </div>
+    {% endif %}
+</body>
+</html>

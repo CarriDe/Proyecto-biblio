@@ -1,9 +1,10 @@
 from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, get_object_or_404
+from django.db.models import Q
 
-from .models import Usuario
+from .models import Usuario, Libro
 
 
 class LoginForm(AuthenticationForm):
@@ -85,3 +86,29 @@ def registro(request):
         form = RegistroForm()
 
     return render(request, 'Biblioteca_1/register.html', {'form': form})
+
+
+def lista_libros(request):
+    """Listado de todos los libros"""
+    libros = Libro.objects.all()
+    context = {'libros': libros}
+    return render(request, 'Biblioteca_1/libros.html', context)
+
+
+def detalle_libro(request, id):
+    """Detalle de un libro específico"""
+    libro = get_object_or_404(Libro, id=id)
+    context = {'libro': libro}
+    return render(request, 'Biblioteca_1/detalle_libro.html', context)
+
+
+def buscar(request):
+    """Búsqueda de libros por título o autor"""
+    query = request.GET.get('q', '')
+    libros = []
+    if query:
+        libros = Libro.objects.filter(
+            Q(titulo__icontains=query) | Q(autores__nombre__icontains=query)
+        ).distinct()
+    context = {'libros': libros, 'query': query}
+    return render(request, 'Biblioteca_1/libros.html', context)

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ libro.titulo }}</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        nav { margin-bottom: 20px; }
+        a { margin-right: 15px; color: #7B2CBF; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .container { max-width: 800px; }
+        .libro-detalle { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+        .libro-detalle h1 { margin-top: 0; }
+        .info-row { margin: 15px 0; }
+        .label { font-weight: bold; color: #7B2CBF; }
+        .disponible { color: green; }
+        .no-disponible { color: red; }
+        button { padding: 10px 20px; background: #7B2CBF; color: white; border: none; cursor: pointer; border-radius: 5px; }
+        button:hover { background: #5A189A; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_libros' %}">Libros</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Cerrar sesión</a>
+        {% else %}
+            <a href="{% url 'login' %}">Iniciar sesión</a>
+        {% endif %}
+    </nav>
+
+    <div class="container">
+        <div class="libro-detalle">
+            <h1>{{ libro.titulo }}</h1>
+
+            <div class="info-row">
+                <span class="label">Tipo:</span> {{ libro.get_tipo_display }}
+            </div>
+
+            <div class="info-row">
+                <span class="label">Categoría:</span> {{ libro.categoria }}
+            </div>
+
+            <div class="info-row">
+                <span class="label">Autores:</span>
+                {% if libro.autores.all %}
+                    {% for autor in libro.autores.all %}
+                        <span>{{ autor }}</span>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <span>Sin autores</span>
+                {% endif %}
+            </div>
+
+            <div class="info-row">
+                <span class="label">Descripción:</span>
+                <p>{{ libro.descripcion }}</p>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Disponibilidad:</span>
+                <span class="{% if libro.disponible %}disponible{% else %}no-disponible{% endif %}">
+                    {% if libro.disponible %}✓ Disponible{% else %}✗ No disponible{% endif %}
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Validado:</span> {% if libro.validado %}Sí{% else %}No{% endif %}
+            </div>
+
+            {% if libro.fecha_publicacion %}
+                <div class="info-row">
+                    <span class="label">Fecha de publicación:</span> {{ libro.fecha_publicacion }}
+                </div>
+            {% endif %}
+
+            {% if user.is_authenticated and libro.disponible %}
+                <button>📕 Solicitar préstamo</button>
+            {% endif %}
+
+            <div style="margin-top: 30px;">
+                <a href="{% url 'lista_libros' %}">← Volver a libros</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

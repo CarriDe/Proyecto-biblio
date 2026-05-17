@@ -1,10 +1,13 @@
+from datetime import timedelta
+
 from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
+from django.utils import timezone
 
-from .models import Usuario, Libro
+from .models import Usuario, Libro, Prestamo
 
 
 class LoginForm(AuthenticationForm):
@@ -100,6 +103,34 @@ def detalle_libro(request, id):
     libro = get_object_or_404(Libro, id=id)
     context = {'libro': libro}
     return render(request, 'Biblioteca_1/detalle_libro.html', context)
+
+
+def reservar_libro(request, id):
+    libro = get_object_or_404(Libro, id=id)
+    if request.method != 'POST' or not request.user.is_authenticated or not libro.disponible:
+        return redirect('detalle_libro', id=id)
+
+    libro.disponible = False
+    libro.prestado = True
+    libro.save()
+    libro.usuarios_prestamo.add(request.user)
+
+    Prestamo.objects.create(
+        usuario=request.user,
+        libro=libro,
+        fecha_fin=timezone.now() + timedelta(days=14),
+        estado='RESERVADO',
+    )
+
+    return redirect('mis_prestamos')
+
+
+def mis_prestamos(request):
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    prestamos = Prestamo.objects.filter(usuario=request.user).select_related('libro')
+    return render(request, 'Biblioteca_1/mis_prestamos.html', {'prestamos': prestamos})
 
 
 def buscar(request):

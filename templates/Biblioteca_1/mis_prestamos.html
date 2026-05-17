@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mis préstamos</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        nav { margin-bottom: 20px; }
+        a { margin-right: 15px; color: #7B2CBF; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .container { max-width: 900px; }
+        .prestamo-card { border: 1px solid #ddd; padding: 15px; border-radius: 5px; margin-bottom: 15px; }
+        .prestamo-card h3 { margin: 0 0 10px 0; }
+        .info-row { margin: 8px 0; }
+        .label { font-weight: bold; color: #7B2CBF; }
+        .sin-prestamos { color: #999; text-align: center; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'inicio' %}">Inicio</a>
+        <a href="{% url 'lista_libros' %}">Libros</a>
+        <a href="{% url 'mis_prestamos' %}">Mis préstamos</a>
+        <a href="{% url 'logout' %}">Cerrar sesión</a>
+    </nav>
+
+    <div class="container">
+        <h1>Mis préstamos</h1>
+
+        {% if prestamos %}
+            {% for prestamo in prestamos %}
+                <div class="prestamo-card">
+                    <h3>{{ prestamo.libro.titulo }}</h3>
+                    <div class="info-row"><span class="label">Estado:</span> {{ prestamo.get_estado_display }}</div>
+                    <div class="info-row"><span class="label">Fecha inicio:</span> {{ prestamo.fecha_inicio|date:'Y-m-d H:i' }}</div>
+                    <div class="info-row">
+                        <span class="label">Fecha fin:</span>
+                        {% if prestamo.fecha_fin %}{{ prestamo.fecha_fin|date:'Y-m-d H:i' }}{% else %}No definida{% endif %}
+                    </div>
+                    <div class="info-row"><a href="{% url 'detalle_libro' prestamo.libro.id %}">Ver libro</a></div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="sin-prestamos">
+                <p>No tienes préstamos ni reservas.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

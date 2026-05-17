@@ -24,6 +24,7 @@
         <a href="{% url 'inicio' %}">Inicio</a>
         <a href="{% url 'lista_libros' %}">Libros</a>
         {% if user.is_authenticated %}
+            <a href="{% url 'mis_prestamos' %}">Mis préstamos</a>
             <a href="{% url 'logout' %}">Cerrar sesión</a>
         {% else %}
             <a href="{% url 'login' %}">Iniciar sesión</a>
@@ -76,7 +77,15 @@
             {% endif %}
 
             {% if user.is_authenticated and libro.disponible %}
-                <button>📕 Solicitar préstamo</button>
+                <form method="post" action="{% url 'reservar_libro' libro.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Reservar libro</button>
+                </form>
+            {% elif not libro.disponible %}
+                <div class="info-row">
+                    <span class="label">Estado:</span>
+                    <span class="no-disponible">Reservado / No disponible</span>
+                </div>
             {% endif %}
 
             <div style="margin-top: 30px;">

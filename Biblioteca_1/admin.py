@@ -25,8 +25,8 @@ class LibroAdmin(admin.ModelAdmin):
 
 
 class PrestamoAdmin(admin.ModelAdmin):
-    list_display = ('libro', 'usuario', 'fecha_prestamo', 'fecha_devolucion', 'devuelto')
-    list_filter = ('devuelto',)
+    list_display = ('libro', 'usuario', 'fecha_inicio', 'fecha_fin', 'estado')
+    list_filter = ('estado',)
     search_fields = ('libro__titulo', 'usuario__username')
 
 

@@ -31,14 +31,20 @@ class Categoria(models.Model):
 
 
 class Prestamo(models.Model):
-    libro = models.ForeignKey('Libro', on_delete=models.CASCADE, related_name='prestamos')
+    ESTADO_CHOICES = (
+        ('RESERVADO', 'Reservado'),
+        ('EN_PRESTAMO', 'En préstamo'),
+        ('DEVUELTO', 'Devuelto'),
+    )
+
     usuario = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='prestamos')
-    fecha_prestamo = models.DateTimeField(auto_now_add=True)
-    fecha_devolucion = models.DateTimeField(null=True, blank=True)
-    devuelto = models.BooleanField(default=False)
+    libro = models.ForeignKey('Libro', on_delete=models.CASCADE, related_name='prestamos')
+    fecha_inicio = models.DateTimeField(auto_now_add=True)
+    fecha_fin = models.DateTimeField(null=True, blank=True)
+    estado = models.CharField(max_length=12, choices=ESTADO_CHOICES, default='RESERVADO')
 
     def __str__(self):
-        return f"Prestamo: {self.libro} - {self.usuario}"
+        return f"Prestamo: {self.libro} - {self.usuario} ({self.estado})"
 
 
 class Libro(models.Model):

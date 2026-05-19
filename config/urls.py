@@ -17,7 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+from Biblioteca_1.admin import custom_admin_site
+
 urlpatterns = [
     path('', include('Biblioteca_1.urls')),
-    path('admin/', admin.site.urls),
+    path('admin/', custom_admin_site.urls),
 ]

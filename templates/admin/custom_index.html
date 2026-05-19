@@ -1,0 +1,142 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ site_title }} | {{ title }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>{{ index_title }}</h1>
+    <p class="dashboard-subtitle">Resumen en tiempo real de libros, préstamos y usuarios.</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card card-blue">
+        <h2>{{ dashboard_stats.libros_totales }}</h2>
+        <p>Libros totales</p>
+    </div>
+    <div class="dashboard-card card-green">
+        <h2>{{ dashboard_stats.libros_disponibles }}</h2>
+        <p>Libros disponibles</p>
+    </div>
+    <div class="dashboard-card card-orange">
+        <h2>{{ dashboard_stats.libros_prestados }}</h2>
+        <p>Libros prestados</p>
+    </div>
+    <div class="dashboard-card card-red">
+        <h2>{{ dashboard_stats.prestamos_activos }}</h2>
+        <p>Préstamos activos</p>
+    </div>
+    <div class="dashboard-card card-teal">
+        <h2>{{ dashboard_stats.usuarios_registrados }}</h2>
+        <p>Usuarios registrados</p>
+    </div>
+    <div class="dashboard-card card-purple">
+        <h2>{{ dashboard_stats.validaciones_pendientes }}</h2>
+        <p>Validaciones pendientes</p>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <div class="dashboard-panel">
+        <div class="dashboard-panel-header">
+            <h2>Estadísticas por categoría</h2>
+        </div>
+        <div class="dashboard-panel-body">
+            <canvas id="tipoChart" height="220"></canvas>
+        </div>
+    </div>
+    <div class="dashboard-panel">
+        <div class="dashboard-panel-header">
+            <h2>Estados de préstamos</h2>
+        </div>
+        <div class="dashboard-panel-body">
+            <canvas id="estadoChart" height="220"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <div class="dashboard-panel dashboard-panel-wide">
+        <div class="dashboard-panel-header">
+            <h2>Gestión rápida</h2>
+        </div>
+        <div class="dashboard-panel-body dashboard-actions">
+            {% for link in quick_links %}
+            <a href="{% url link.url %}" class="button">{{ link.label }}</a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const tipoCtx = document.getElementById('tipoChart');
+    new Chart(tipoCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.tipos|safe }},
+            datasets: [{
+                label: 'Libros por tipo',
+                data: {{ chart_data.tipos_totales|safe }},
+                backgroundColor: '#4f46e5',
+                borderColor: '#4338ca',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    const estadoCtx = document.getElementById('estadoChart');
+    new Chart(estadoCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ chart_data.estados|safe }},
+            datasets: [{
+                label: 'Estado de préstamos',
+                data: {{ chart_data.estados_totales|safe }},
+                backgroundColor: ['#10b981', '#f97316', '#ef4444'],
+                borderColor: '#ffffff',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+</script>
+
+<style>
+.dashboard-header { margin-bottom: 1.5rem; }
+.dashboard-header h1 { margin-bottom: 0.25rem; }
+.dashboard-subtitle { color: #6b7280; margin-top: 0; }
+.dashboard-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 1.5rem; }
+.dashboard-card { padding: 1.25rem; border-radius: 0.75rem; color: white; box-shadow: 0 1px 2px rgb(15 23 42 / 0.05); }
+.dashboard-card h2 { font-size: 2.25rem; margin: 0 0 0.5rem; }
+.dashboard-card p { margin: 0; opacity: 0.9; }
+.card-blue { background: #2563eb; }
+.card-green { background: #16a34a; }
+.card-orange { background: #f97316; }
+.card-red { background: #dc2626; }
+.card-teal { background: #0f766e; }
+.card-purple { background: #7c3aed; }
+.dashboard-section { display: grid; gap: 1rem; margin-bottom: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.dashboard-panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 0.75rem; box-shadow: 0 1px 2px rgb(15 23 42 / 0.05); overflow: hidden; }
+.dashboard-panel-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; }
+.dashboard-panel-header h2 { margin: 0; font-size: 1.1rem; }
+.dashboard-panel-body { padding: 1rem 1.25rem; }
+.dashboard-panel-wide { grid-column: 1 / -1; }
+.dashboard-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.dashboard-actions .button { display: inline-flex; align-items: center; justify-content: center; min-width: 150px; padding: 0.75rem 1rem; border-radius: 0.5rem; background: #1d4ed8; color: white; text-decoration: none; font-weight: 600; }
+.dashboard-actions .button:hover { background: #1e40af; }
+</style>
+{% endblock %}

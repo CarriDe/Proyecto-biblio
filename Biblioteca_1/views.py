@@ -1,13 +1,62 @@
 from datetime import timedelta
 
 from django import forms
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.core.mail import send_mail
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
 from django.utils import timezone
 
 from .models import Usuario, Libro, Prestamo
+
+
+def enviar_correo_reserva(prestamo):
+    usuario = prestamo.usuario
+    if not usuario.email:
+        return
+
+    fecha_fin = prestamo.fecha_fin.strftime('%d/%m/%Y') if prestamo.fecha_fin else 'sin fecha'
+    subject = f'Reserva confirmada: {prestamo.libro.titulo}'
+    message = (
+        f'Hola {usuario.first_name or usuario.username},\n\n'
+        f'Tu reserva del libro "{prestamo.libro.titulo}" ha sido registrada correctamente.\n'
+        f'Fecha de devolución estimada: {fecha_fin}.\n\n'
+        'Si necesitas más información, visita tu sección de préstamos.\n\n'
+        'Gracias por usar la Biblioteca.'
+    )
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [usuario.email],
+        fail_silently=True,
+    )
+
+
+def enviar_recordatorio_devolucion(prestamo):
+    usuario = prestamo.usuario
+    if not usuario.email:
+        return
+
+    fecha_fin = prestamo.fecha_fin.strftime('%d/%m/%Y') if prestamo.fecha_fin else 'sin fecha'
+    subject = f'Recordatorio devolución: {prestamo.libro.titulo}'
+    message = (
+        f'Hola {usuario.first_name or usuario.username},\n\n'
+        f'Recordamos que el libro "{prestamo.libro.titulo}" tiene fecha de devolución programada para el {fecha_fin}.\n'
+        'Por favor devuelve el libro puntualmente para evitar demoras en tu cuenta.\n\n'
+        'Gracias por usar la Biblioteca.'
+    )
+
+    send_mail(
+        subject,
+        message,
+        settings.DEFAULT_FROM_EMAIL,
+        [usuario.email],
+        fail_silently=True,
+    )
 
 
 class LoginForm(AuthenticationForm):
@@ -115,12 +164,14 @@ def reservar_libro(request, id):
     libro.save()
     libro.usuarios_prestamo.add(request.user)
 
-    Prestamo.objects.create(
+    prestamo = Prestamo.objects.create(
         usuario=request.user,
         libro=libro,
         fecha_fin=timezone.now() + timedelta(days=14),
         estado='RESERVADO',
     )
+
+    enviar_correo_reserva(prestamo)
 
     return redirect('mis_prestamos')
 
